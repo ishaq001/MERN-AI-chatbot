@@ -27,11 +27,13 @@ export const userSignUp = async (
 ) => {
 	//user signup
 	try {
+		console.log("im here")
 		const { name, email, password } = req.body
 		console.log({ name, email, password })
 		const hashedPassword = await hash(password, 10)
 		const user = new User({ name, email, password: hashedPassword })
 		user.save()
+		console.log({ user })
 		res.status(200).json({ message: "User created", id: user._id })
 	} catch (e) {
 		console.log(e)
