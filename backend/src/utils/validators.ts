@@ -31,3 +31,10 @@ export const signUpValidator = [
 		.withMessage("Password should be at least 6 characters")
 ]
 
+export const loginValidator = [
+	body("email").trim().isEmail().withMessage("Email is required"),
+	body("password")
+		.trim()
+		.isLength({ min: 6 })
+		.withMessage("Password should be at least 6 characters")
+]
