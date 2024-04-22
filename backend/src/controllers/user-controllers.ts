@@ -54,10 +54,10 @@ export const userLogin = async (
 	try {
 		const { email, password } = req.body
 		const user = await User.findOne({ email })
-		const isPasswordCorrect = await compare(password, user.password)
+		if (!user) res.status(401).json({ message: "Mail not registered with us" })
+		const isPasswordCorrect = await compare(password, user?.password)
 		if (!isPasswordCorrect)
 			res.status(401).json({ message: "Incorrent Password" })
-		if (!user) res.status(401).json({ message: "User not found" })
 		res.status(200).json({ message: "login Successful", id: user._id })
 	} catch (e) {
 		console.log(e)
