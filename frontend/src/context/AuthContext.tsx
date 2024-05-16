@@ -30,7 +30,7 @@ type ChildrenType = {
 }
 export const AuthProvider = ({ children }: ChildrenType) => {
 	const [user, setUser] = useState<User | null>(null)
-	const [isLoggedIn, setIsloggedIn] = useState<boolean>(true)
+	const [isLoggedIn, setIsloggedIn] = useState<boolean>(false)
 
 	useEffect(() => {
 		// fetch if user cookies are valid then dont need to login  again
