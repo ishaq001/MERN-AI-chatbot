@@ -37,27 +37,31 @@ export const userSignUp = async (
 		const user = new User({ name, email, password: hashedPassword })
 		user.save()
 
-			// clear old cookies
-			res.clearCookie(COOKIE_NAME, {
-				httpOnly: true,
-				domain: "localhost",
-				signed: true,
-				path:'/'
-			})
-	
-			// create new token and cookie
-			const token = createToken(user._id.toString(), user.email, "7d")
-			const expires = new Date()
-			expires.setDate(new Date().getDate() + 7)
-			res.cookie(COOKIE_NAME, token, {
-				path: "/",
-				domain: "localhost",
-				expires,
-				httpOnly: true,
-				signed: true
-			})
+		// clear old cookies
+		res.clearCookie(COOKIE_NAME, {
+			httpOnly: true,
+			domain: "localhost",
+			signed: true,
+			path: "/"
+		})
 
-		res.status(200).json({ message: "User created", id: user._id })
+		// create new token and cookie
+		const token = createToken(user._id.toString(), user.email, "7d")
+		const expires = new Date()
+		expires.setDate(new Date().getDate() + 7)
+		res.cookie(COOKIE_NAME, token, {
+			path: "/",
+			domain: "localhost",
+			expires,
+			httpOnly: true,
+			signed: true
+		})
+
+		res.status(200).json({
+			message: "User created",
+			name: user.name,
+			email: user.email
+		})
 	} catch (e) {
 		console.log(e)
 		res.status(200).json({
@@ -77,7 +81,7 @@ export const userLogin = async (
 		const { email, password } = req.body
 		const user = await User.findOne({ email })
 		if (!user)
-			res.status(401).json({
+			return res.status(401).json({
 				message: "Mail not registered with us"
 			})
 		const isPasswordCorrect = await compare(
@@ -85,14 +89,16 @@ export const userLogin = async (
 			user?.password
 		)
 		if (!isPasswordCorrect)
-			res.status(401).json({ message: "Incorrent Password" })
+			return res
+				.status(401)
+				.json({ message: "Incorrent Password" })
 
 		// clear old cookies
 		res.clearCookie(COOKIE_NAME, {
 			httpOnly: true,
 			domain: "localhost",
 			signed: true,
-			path:'/'
+			path: "/"
 		})
 
 		// create new token and cookie
@@ -106,9 +112,40 @@ export const userLogin = async (
 			httpOnly: true,
 			signed: true
 		})
-		res.status(200).json({
+		return res.status(200).json({
 			message: "login Successful",
-			id: user._id
+			name: user.name,
+			email: user.email
+		})
+	} catch (e) {
+		console.log(e)
+		res.status(200).json({
+			message: "Failed to login",
+			error: e.message
+		})
+	}
+}
+
+export const verifyUser = async (
+	req: Request,
+	res: Response,
+	next: NextFunction
+) => {
+	//verify token
+	try {
+		const user = await User.findById(res.locals.jwtData.id)
+		if (!user)
+			return res.status(401).json({
+				message: "User not Registered || token malfunctioned"
+			})
+
+		if (user._id.toString() !== res.locals.jwtData.id) {
+			return res.status(401).send("permission didn't match")
+		}
+		return res.status(200).json({
+			message: "login Successful",
+			name: user.name,
+			email: user.email
 		})
 	} catch (e) {
 		console.log(e)
