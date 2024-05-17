@@ -1,9 +1,20 @@
 import { Box, Button, Typography } from "@mui/material"
-import React from "react"
+import React, { FormEvent } from "react"
 import CustomizedInput from "../components/shared/CustomizedInput"
 import { IoIosLogIn } from "react-icons/io"
+import { useAuth } from "../context/AuthContext"
 
 function Login() {
+	const auth = useAuth()
+	const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
+		e.preventDefault()
+		const formData = new FormData(e.currentTarget)
+		const email = formData.get("email") as string
+		const password = formData.get("password") as string
+
+	await auth?.login(email, password)
+	}
+
 	return (
 		<Box
 			width={"100%"}
@@ -32,6 +43,7 @@ function Login() {
 				mt={16}
 			>
 				<form
+					onSubmit={handleSubmit}
 					style={{
 						margin: "auto",
 						padding: "30px",
@@ -77,9 +89,8 @@ function Login() {
 									bgcolor: "#ffff",
 									color: "#000000"
 								}
-                
 							}}
-              endIcon={<IoIosLogIn />}
+							endIcon={<IoIosLogIn />}
 						>
 							Login
 						</Button>
